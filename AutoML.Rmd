@@ -191,7 +191,7 @@ Look at the basement and the 2nd floor Square footage, you can see that there ar
 Context matters when doing feature engineering.  Take, for example, the Ames housing data.  Ames is a university town where many people have some ties to the university of Iowa.  Therefore, looking at things like distance from the university might make sense to include in the analysis.  Another thing to think about is things like the Year built. The impact of the year built is not absolute and shifts over the years.  Therefore one might want to make a variable that is the age of the house at sales.   
 
 
-```{r}
+```{r}a
 # handling Year features
 ames_raw$yrs_since_remod <- ames_raw$`Yr Sold` - ames_raw$`Year Remod/Add`
 
@@ -286,7 +286,7 @@ if (!require("BiocManager", quietly = TRUE))
 Alternatively, you could compress the correlated variable using dimension reduction.  However, it's no free lunch since you need to do all the scaling and missing data processing before you can apply PCA and you need to decide how many components to include.  pcaMethods package offers a way to fit a model even in the presence of missing data.
 
 ```{r}
-BiocManager::install("pcaMethods")
+#BiocManager::install("pcaMethods")
 library(pcaMethods)
 
 pca_numeric<-pcaMethods::pca(numeric_vars,nPcs=20,scale="uv")
@@ -328,8 +328,7 @@ You will use the framework of tidymodel workflow, which will run these transform
 
 Since you've worked on it in MA679 please copy and paste your best model here.  
 ```{r,echo=TRUE}
-##
-##
+lmfit_2008 <- lm(SalePrice~`Gr Liv Area` + `1st Flr SF`, ames_raw_2008) 
 ```
 
 Your answer:
@@ -343,8 +342,13 @@ Please write your answer in full sentences.
 Please perform feature engineering on the Ames housing data that you think will help with the prediction.
 
 ```{r,echo=TRUE}
-##
-##
+ames_raw_2008$TotalSF <- ames_raw_2008$`Gr Liv Area` + ames_raw_2008$`1st Flr SF`
+ames_raw_2009$TotalSF <- ames_raw_2009$`Gr Liv Area` + ames_raw_2009$`1st Flr SF`
+
+lmfit_2008_with_FE <- lm(SalePrice ~ TotalSF, data = ames_raw_2008)
+
+
+
 ```
 
 Your answer:
@@ -358,8 +362,14 @@ Please write your answer in full sentences.
 Compare the result before and after the feature engineering step.
 
 ```{r,echo=TRUE}
-##
-##
+predictions_original <- predict(lmfit_2008, newdata = ames_raw_2009)
+MSE_original <- mean((predictions_original - ames_raw_2009$SalePrice)^2)
+print(paste("MSE of the original model:", MSE_original))
+
+
+predictions <- predict(lmfit_2008_with_FE, newdata = ames_raw_2009)
+MSE <- mean((predictions - ames_raw_2009$SalePrice)^2)
+print(paste("MSE of the model with feature engineering:", MSE))
 ```
 
 
@@ -368,7 +378,7 @@ Your answer:
 ~~~
 Please write your answer in full sentences.
 
-
+The test MSE has been lower, so the feature engineering has some effect on the model improvement.
 ~~~
 
 ## AutoML 
